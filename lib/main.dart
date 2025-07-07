@@ -39,37 +39,60 @@ class _CalculatorAppState extends State<CalculatorApp> {
         } catch (e) {
           _result = 'Lỗi';
         }
+      } else if (value == '()') {
+        _handleParenthesis();
       } else {
         _expression += value;
       }
     });
   }
 
-  String _evaluate(String exp) {
-    try {
-      // Xử lý phép chia lấy dư %
-      exp = exp.replaceAllMapped(
-        RegExp(r'(\d+)\s*%\s*(\d+)'),
-        (match) {
-          final a = int.parse(match.group(1)!);
-          final b = int.parse(match.group(2)!);
-          return (a % b).toString();
-        },
-      );
-
-      Parser p = Parser();
-      Expression expression = p.parse(exp);
-      ContextModel cm = ContextModel();
-      double eval = expression.evaluate(EvaluationType.REAL, cm);
-
-      if (eval == eval.toInt()) {
-        return eval.toInt().toString();
-      }
-      return eval.toStringAsFixed(2);
-    } catch (e) {
-      return 'Lỗi';
+  void _handleParenthesis() {
+    int open = '('.allMatches(_expression).length;
+    int close = ')'.allMatches(_expression).length;
+    if (open <= close) {
+      _expression += '(';
+    } else {
+      _expression += ')';
     }
   }
+
+  String _evaluate(String exp) {
+  try {
+    // Chuẩn hóa biểu thức: × → *, ÷ → /
+    exp = exp.replaceAll('×', '*').replaceAll('÷', '/');
+
+    // Xử lý phép chia lấy dư: a % b → a % b (dùng mod)
+    exp = exp.replaceAllMapped(
+      RegExp(r'(\d+)\s*%\s*(\d+)'),
+      (match) {
+        final a = int.parse(match.group(1)!);
+        final b = int.parse(match.group(2)!);
+        return (a % b).toString();
+      },
+    );
+
+    // Sau đó mới xử lý phần trăm: 5% → (5/100)
+    exp = exp.replaceAllMapped(
+      RegExp(r'(\d+(\.\d+)?)%'),
+      (match) => '(${match.group(1)}/100)',
+    );
+
+    // Đánh giá biểu thức
+    Parser p = Parser();
+    Expression expression = p.parse(exp);
+    ContextModel cm = ContextModel();
+    double eval = expression.evaluate(EvaluationType.REAL, cm);
+
+    if (eval == eval.toInt()) {
+      return eval.toInt().toString();
+    }
+    return eval.toStringAsFixed(2);
+  } catch (e) {
+    return 'Lỗi';
+  }
+}
+
 
   Widget _buildButton(String label, {Color? color}) {
     return SizedBox(
@@ -92,11 +115,11 @@ class _CalculatorAppState extends State<CalculatorApp> {
 
   Widget _buildKeyboard() {
     final buttons = [
-      ['AC', 'DEL', '%', '÷'],
+      ['AC', 'DEL', '%', '/'],
       ['7', '8', '9', '×'],
       ['4', '5', '6', '-'],
       ['1', '2', '3', '+'],
-      ['0', '.', '=', '']
+      ['()', '0', '.', '='],
     ];
 
     return Column(
