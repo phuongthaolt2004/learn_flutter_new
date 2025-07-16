@@ -1,0 +1,31 @@
+# Dart
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# Flutter
+.flutter-plugins
+.flutter-plugins-dependencies
+.idea/
+.vscode/
+*.iml
+
+# Android
+android/.gradle/
+android/app/build/
+
+# iOS
+ios/Pods/
+ios/build/
+
+# macOS
+macos/Pods/
+macos/build/
+macos/Flutter/ephemeral/
+
+# VS Code & IntelliJ
+*.iml
+*.ipr
+*.iws
+*.sw?
