@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:todo_list/screens/welcome_screen.dart';
+import 'package:learn_flutter/screens/welcome_screen.dart';
 import 'models/todo.dart';
 
 void main() async {
@@ -9,7 +8,6 @@ void main() async {
 
   await Hive.initFlutter();
 
-  // Đăng ký adapter nếu bạn dùng Hive Type
   Hive.registerAdapter(TodoAdapter());
 
   // Mở box trước khi chạy app

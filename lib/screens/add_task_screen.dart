@@ -13,7 +13,7 @@ class AddTaskScreen extends StatefulWidget {
 class _AddTaskScreenState extends State<AddTaskScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
+  final ValueNotifier<DateTime> _selectedDate = ValueNotifier(DateTime.now());
   bool isButtonEnabled = false;
 
   @override
@@ -37,7 +37,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     final newTodo = Todo(
       title: _titleController.text.trim(),
       description: _descController.text.trim(),
-      deadline: _selectedDate,
+      deadline: _selectedDate.value,
     );
 
     widget.onAdd(newTodo);
@@ -47,15 +47,13 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   void _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDate: _selectedDate.value,
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
 
     if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
+      _selectedDate.value = picked;
     }
   }
 
@@ -63,6 +61,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   void dispose() {
     _titleController.dispose();
     _descController.dispose();
+    _selectedDate.dispose();
     super.dispose();
   }
 
@@ -83,15 +82,20 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               decoration: const InputDecoration(labelText: 'Mô tả'),
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Text('Deadline: ${_selectedDate.toLocal().toString().split(' ')[0]}'),
-                const Spacer(),
-                TextButton(
-                  onPressed: _pickDate,
-                  child: const Text('Chọn ngày'),
-                ),
-              ],
+            ValueListenableBuilder<DateTime>(
+              valueListenable: _selectedDate,
+              builder: (_, date, __) {
+                return Row(
+                  children: [
+                    Text('Deadline: ${date.toLocal().toString().split(' ')[0]}'),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: _pickDate,
+                      child: const Text('Chọn ngày'),
+                    ),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 20),
             ElevatedButton(
